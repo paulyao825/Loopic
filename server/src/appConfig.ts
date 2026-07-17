@@ -73,7 +73,7 @@ function loadDotEnv(): void {
 }
 
 /**
- * Load topshot.config.json fresh (called per run so edits apply without a
+ * Load loopic.config.json fresh (called per run so edits apply without a
  * restart). Any misconfiguration degrades to the heuristic judge with a
  * note — a demo must never die on a config typo.
  */
@@ -81,11 +81,11 @@ export function loadAppConfig(): AppConfig {
   loadDotEnv();
 
   let raw: Record<string, unknown> = {};
-  const file = path.join(ROOT, "topshot.config.json");
+  const file = path.join(ROOT, "loopic.config.json");
   try {
     if (existsSync(file)) raw = JSON.parse(readFileSync(file, "utf8"));
   } catch (err) {
-    console.warn(`topshot.config.json unreadable (${err}); using defaults`);
+    console.warn(`loopic.config.json unreadable (${err}); using defaults`);
   }
 
   const judgeRaw = (raw.judge ?? {}) as Record<string, string>;
@@ -95,7 +95,7 @@ export function loadAppConfig(): AppConfig {
   const awsRaw = (raw.aws ?? {}) as Record<string, string>;
   const aws: AwsAppConfig = {
     region: process.env.AWS_REGION ?? awsRaw.region ?? "us-east-1",
-    s3Bucket: process.env.TOPSHOT_S3_BUCKET ?? awsRaw.s3Bucket ?? "",
+    s3Bucket: process.env.LOOPIC_S3_BUCKET ?? awsRaw.s3Bucket ?? "",
   };
 
   const provider = (process.env.JUDGE_PROVIDER ?? judgeRaw.provider ?? "heuristic") as JudgeProvider;

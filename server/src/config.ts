@@ -1,6 +1,6 @@
 export type EditorBackend = "local" | "zero";
 
-export interface TopshotConfig {
+export interface LoopicConfig {
   /** Which editor backend Loop 2's act() drives. */
   editorBackend: EditorBackend;
   /** Run the final "pro enhancement" flourish on the winning frame via Zero. */
@@ -10,7 +10,7 @@ export interface TopshotConfig {
   seed: number;
 }
 
-export function loadConfig(env: NodeJS.ProcessEnv = process.env): TopshotConfig {
+export function loadConfig(env: NodeJS.ProcessEnv = process.env): LoopicConfig {
   const backend = env.EDITOR_BACKEND === "zero" ? "zero" : "local";
   return {
     editorBackend: backend,

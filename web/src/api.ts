@@ -9,7 +9,9 @@ const API_BASE = (
   new URLSearchParams(window.location.search).get("api") ??
   (import.meta.env.VITE_API_BASE as string | undefined) ??
   ""
-).replace(/\/+$/, "");
+)
+  .trim()
+  .replace(/\/+$/, "");
 
 const api = (p: string) => `${API_BASE}${p}`;
 
@@ -58,13 +60,16 @@ export async function startRun(opts: {
   return runId;
 }
 
-export function subscribeToRun(runId: string, onEvent: (e: RunEvent) => void): () => void {
+export function subscribeToRun(runId: string, onEvent: (e: RunEvent) => void, onError?: (message: string) => void): () => void {
   const source = new EventSource(api(`/api/runs/${runId}/events`));
   source.onmessage = (msg) => {
     const event = absolutizeMedia(JSON.parse(msg.data) as RunEvent);
     onEvent(event);
     if (event.type === "run:done" || event.type === "run:error") source.close();
   };
-  source.onerror = () => source.close();
+  source.onerror = () => {
+    onError?.("Lost connection to the Loopic run stream. Start a new run and try again.");
+    source.close();
+  };
   return () => source.close();
 }

@@ -1,8 +1,8 @@
-# Akash SDL — deploys Topshot (API + UI in one container) to the Akash
+# Akash SDL — deploys Loopic (API + UI in one container) to the Akash
 # decentralized compute marketplace.
 #
 # Usage (Akash CLI or https://console.akash.network):
-#   1. Build & push the image:  docker build -t <you>/topshot:latest . && docker push <you>/topshot:latest
+#   1. Build & push the image:  docker build -t <you>/loopic:latest . && docker push <you>/loopic:latest
 #   2. Set the image below, then create the deployment from this SDL.
 #   3. Put provider secrets (OPENAI_API_KEY / AWS keys) in the env section
 #      or use Akash console's secret handling.
@@ -13,8 +13,8 @@
 version: "2.0"
 
 services:
-  topshot:
-    image: REPLACE_ME/topshot:latest
+  loopic:
+    image: REPLACE_ME/loopic:latest
     expose:
       - port: 4000
         as: 80
@@ -30,7 +30,7 @@ services:
 
 profiles:
   compute:
-    topshot:
+    loopic:
       resources:
         cpu:
           units: 2
@@ -41,12 +41,12 @@ profiles:
   placement:
     dcloud:
       pricing:
-        topshot:
+        loopic:
           denom: uakt
           amount: 10000
 
 deployment:
-  topshot:
+  loopic:
     dcloud:
-      profile: topshot
+      profile: loopic
       count: 1

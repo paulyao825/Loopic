@@ -16,6 +16,10 @@ const PORT = Number(process.env.PORT ?? 4000);
 
 const urlFor = (absPath: string) => "/media/" + path.relative(DATA_DIR, absPath).split(path.sep).join("/");
 const resolvePath = (url: string) => path.join(DATA_DIR, url.replace(/^\/media\//, ""));
+const safeVideoPath = (videoId: unknown): string | undefined => {
+  if (typeof videoId !== "string" || !/^[\w.-]+$/.test(videoId)) return undefined;
+  return path.join(DATA_DIR, "uploads", videoId);
+};
 
 const runs = new RunManager(DATA_DIR, urlFor, resolvePath);
 
@@ -54,8 +58,8 @@ app.post("/api/sample", async (_req, res) => {
 
 app.post("/api/run", (req, res) => {
   const { videoId, n = 3, editorBackend = "local", flourish = true } = req.body ?? {};
-  const videoPath = path.join(DATA_DIR, "uploads", String(videoId ?? ""));
-  if (!videoId || !existsSync(videoPath)) return res.status(400).json({ error: "unknown videoId" });
+  const videoPath = safeVideoPath(videoId);
+  if (!videoPath || !existsSync(videoPath)) return res.status(400).json({ error: "unknown videoId" });
   const runId = runs.start({
     videoPath,
     n: Math.max(1, Math.min(8, Number(n))),
@@ -88,5 +92,5 @@ if (existsSync(WEB_DIST)) {
 }
 
 app.listen(PORT, () => {
-  console.log(`topshot server listening on http://localhost:${PORT}`);
+  console.log(`loopic server listening on http://localhost:${PORT}`);
 });

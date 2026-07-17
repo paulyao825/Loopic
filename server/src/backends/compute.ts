@@ -1,7 +1,7 @@
 /**
  * Compute layer — Akash integration.
  *
- * Topshot's loops are latency-critical (the reward must return in seconds),
+ * Loopic's loops are latency-critical (the reward must return in seconds),
  * so the right way to use decentralized compute is to run the WHOLE agent as
  * an Akash deployment (see deploy/akash.sdl.yaml + Dockerfile), not to ship
  * individual tasks over the wire mid-loop.

@@ -32,7 +32,7 @@ Respond ONLY with JSON: {"cropFraming":{"score":n,"reason":"...","hint":"..."},"
 /**
  * LLM vision judge, provider-agnostic. OpenAI, Gemini and OpenRouter are
  * served through the OpenAI-compatible chat completions API; Anthropic
- * through its native messages API. Configure in topshot.config.json.
+ * through its native messages API. Configure in loopic.config.json.
  */
 export class LlmVisionJudge implements VisionJudge {
   constructor(

@@ -1,5 +1,5 @@
 {
-  "$comment": "Topshot runtime config \u2014 reloaded on every run, no restart needed.",
+  "$comment": "Loopic runtime config \u2014 reloaded on every run, no restart needed.",
   "judge": {
     "$comment": "provider: heuristic | openai | gemini | anthropic | openrouter | bedrock. apiKeyEnv defaults per provider (OPENAI_API_KEY, GEMINI_API_KEY, ANTHROPIC_API_KEY, OPENROUTER_API_KEY) \u2014 put keys in .env. bedrock uses AWS credentials (env or ~/.aws) instead of an API key; default model amazon.nova-lite-v1:0. Missing key falls back to heuristic.",
     "provider": "openai",

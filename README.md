@@ -1,199 +1,169 @@
-# Topshot — a self-correcting photo agent
+# Loopic - AI visual storytelling assistant
 
-Upload a video; an agent picks the best N frames and edits each one in a
-critique-and-refine loop until the edit clears a quality bar. The agent
-**plans, acts, observes, and self-corrects** — every round is streamed
-live to the UI: score climbing, corrections named, missteps reverted.
+Loopic finds the best photos hidden inside videos. Upload a video, and the
+agent extracts candidate frames, selects the strongest and most varied moments,
+then improves each one through a critique-and-refine loop.
+
+The current prototype focuses on discovering and improving strong photo moments:
+
+- frame extraction from raw video
+- fast visual scoring for sharpness, exposure, contrast, color, and interest
+- looped edit refinement with named corrections
+- visible round history, score changes, and final output gallery
+- AWS Bedrock judge support and optional S3 image hosting
+- Zero.xyz discovery and optional paid flourish pass
+- Akash-ready container deployment
+
+Every run is streamed live to the UI. You can see the agent plan, act, observe,
+score, correct, and stop when the output clears the quality bar.
 
 ## Run it
 
 ```bash
 npm install
 
-# demo / development (API on :4000, UI on :5173 with hot reload)
+# API on :4000, UI on :5173 with hot reload
 npm run dev
 
-# or single-process: build the UI once, serve everything on :4000
+# or build the UI once and serve everything from the API
 npm run build && npm start
 ```
 
-Open the app, click **Use sample reel** (generates a test video with
-deliberately bad exposure — no footage needed) or drop in any video.
+Open the app, click **Use sample reel** to generate a test video, or upload any
+video file.
 
-Extras:
+Extra:
 
-- `npm run demo` — the original all-mock console demo (score climbing on fake data).
+- `npm run demo` - all-mock console demo
 
-## Configuration — `topshot.config.json`
+## Configuration - `loopic.config.json`
 
-Reloaded on **every run** — edit it while the server is up and the next
-run picks it up.
+The config file is reloaded on every run, so edits apply without restarting the
+server.
 
 ```jsonc
 {
   "judge": {
     "provider": "heuristic",   // heuristic | openai | gemini | anthropic | openrouter | bedrock
-    "model": "",               // empty = provider default (gpt-4o-mini, amazon.nova-lite-v1:0, ...)
-    "apiKeyEnv": "",           // empty = provider default (OPENAI_API_KEY, GEMINI_API_KEY, ...)
+    "model": "",               // empty = provider default
+    "apiKeyEnv": "",           // empty = provider default env var
     "baseUrl": ""              // override for proxies / compatible endpoints
   },
   "aws": {
-    "region": "us-east-1",     // Bedrock + S3 region
-    "s3Bucket": ""             // optional: host intermediate images via presigned URLs
+    "region": "us-east-1",
+    "s3Bucket": ""
   },
   "loop": { "bar": 7.5, "maxRounds": 8 },
   "zero": {
     "enabled": true,
-    "maxPayUsdc": 0,           // > 0 allows paid Zero.xyz invocations up to this per call
+    "maxPayUsdc": 0,
     "flourishQuery": "image upscale enhance super-resolution photo",
     "editQuery": "photo image editing crop resize exposure"
   }
 }
 ```
 
-Put API keys in `.env` (see `.env.example`). Judge selection is fail-safe:
-a missing key or a provider error mid-run degrades to the pixel-heuristic
-judge and tells you why (banner in the UI, `judge:fallback` event).
-OpenAI, Gemini, and OpenRouter share one OpenAI-compatible client;
-Anthropic uses its native API — all four emit the same axes and hint
-vocabulary, so the loop is identical under every judge.
+Put API keys in `.env`. Missing keys or provider errors degrade to the local
+pixel-heuristic judge, and the UI shows the fallback reason.
 
-## AWS — Bedrock judge + S3 hosting
+## Built With
 
-Two real AWS touchpoints, both through the SDK default credential chain
-(env vars, `~/.aws`, SSO, roles — see `.env.example`):
+- Akash
+- Amazon Web Services
+- Cursor
+- TypeScript
+- Zero.xyz
 
-- **Bedrock vision judge** — set `judge.provider` to `"bedrock"` and the
-  critique runs on AWS Bedrock via the model-agnostic Converse API
-  (default model `amazon.nova-lite-v1:0`; any vision model you have
-  access to works, e.g. Claude on Bedrock). Same prompt, axes, and hint
-  vocabulary as every other judge; missing credentials degrade to the
-  pixel heuristic with a visible note.
-- **S3 image hosting** — set `aws.s3Bucket` and intermediate images sent
-  to remote editors (the Zero.xyz flourish) are uploaded to your bucket
-  and served via 1-hour presigned GETs instead of free ephemeral hosts.
+## AWS
 
-## Akash — decentralized compute
+Loopic includes two AWS integration points:
 
-The loops are latency-critical (reward must return in seconds), so the
-right unit of Akash compute is the **whole agent**, not per-task jobs:
+- **Bedrock vision judge** - set `judge.provider` to `"bedrock"` and the edit
+  critique runs through AWS Bedrock using the SDK default credential chain.
+- **S3 image hosting** - set `aws.s3Bucket` to host intermediate images through
+  presigned URLs for remote editor calls.
 
-- `Dockerfile` + `deploy/akash.sdl.yaml` deploy the full app (API + UI in
-  one container) to the Akash marketplace — build, push, paste the SDL
-  into [console.akash.network](https://console.akash.network).
-- The server detects an Akash provider at runtime (via the `AKASH_*` env
-  vars providers inject) and the UI infrastructure panel switches from
-  `local` to `akash` with the deployment hostname.
-- Every loop task is timed through the `ComputeRunner` layer
-  (`compute:task` events), so the panel shows exactly where compute went.
+If AWS credentials are missing, the run continues with the heuristic judge and
+shows the fallback note in the UI.
 
-## Zero.xyz — real integration
+## Zero.xyz
 
-The `@zeroxyz/cli` is bundled. Every run performs a **live capability
-search** against the Zero catalog (free, no account) and the UI shows
-what it found — e.g. "AI Image Upscaler / Super-Resolution (ESRGAN via
-fal.ai), $0.1/call, healthy". Paid invocation is gated honestly:
+Loopic uses `@zeroxyz/cli` for live capability discovery. Discovery is free and
+visible in the infrastructure panel.
 
-1. `npx zero auth login` (creates a wallet) and fund it with USDC on Base,
-2. set `zero.maxPayUsdc` in `topshot.config.json` (e.g. `0.15`),
+Paid invocation is gated:
 
-and the final flourish pass sends the winning frame to the discovered
-capability for real remote enhancement (x402 payment handled by the CLI).
-Without a wallet the run still works: discovery stays real, the flourish
-renders locally, and the event stream reports `via: "local-render"` with
-the reason. Remote failures fall back the same way mid-run.
+1. Run `npx zero auth login`.
+2. Fund the wallet with USDC on Base.
+3. Set `zero.maxPayUsdc` in `loopic.config.json`.
 
-## Architecture
+Without a wallet or budget, Loopic still works. The final flourish falls back to
+a local enhancement pass and reports that clearly.
 
-One reusable `Loop` abstraction (`server/src/core/loop.ts`) is the spine:
+## Akash
 
-```
-act() -> observe() -> score() -> correct() -> ... until score >= bar or round cap
+The repo includes:
+
+- `Dockerfile` - single container serving API + built web UI
+- `deploy/akash.sdl.yaml` - Akash deployment template
+
+Loopic detects Akash provider environment variables at runtime and reports the
+compute host in the UI infrastructure panel.
+
+## How It Works
+
+Loopic uses one reusable loop abstraction:
+
+```txt
+act -> observe -> score -> correct -> repeat
 ```
 
-`runLoop()` owns the score cache (keyed per candidate — reward returns in
-seconds) and logs every round (input, output, per-axis critique,
-correction) which the server streams to the UI over SSE.
+Two product loops plug into it:
 
-Two instances plug into it:
+| Loop | Goal | Output |
+| --- | --- | --- |
+| Loop 1 | Select the strongest and most varied frames | Candidate photos |
+| Loop 2 | Improve each chosen frame through bounded edits | Refined photos |
 
-| | Loop 1 — frame selection | Loop 2 — edit refinement |
-|---|---|---|
-| act | pick top-N frames (quality − diversity penalty) | `Editor.edit(frame, recipe)` |
-| observe | pixel stats + near-dupe pairs | vision-judge critique of edited pixels |
-| score | `quality`, `variety` axes | `cropFraming`, `exposure`, `contrast`, `color`, `whiteBalance`, `sharpness` |
-| correct | ban near-dupes / rebalance weights | adjust ONLY the lowest axis's recipe param |
+The edit loop changes one parameter at a time: crop, exposure, contrast,
+saturation, temperature, or sharpening. A judge scores concrete visual axes and
+returns directional hints such as `brighten`, `tighten`, or `warmer`.
 
-The edit space is bounded and named — every parameter has a hard range
-and exactly one judge axis that can move it:
+## What's Next for Loopic
 
-| Recipe param | Range | Judge axis | Hints |
-|---|---|---|---|
-| `crop` (x,y,w,h) | ≥ 0.2 side | cropFraming | shift-\*, tighten (zoom in), loosen |
-| `exposureEv` | −2 … +2 | exposure | brighten, darken |
-| `contrast` | 0.6 … 1.6 | contrast | more/less-contrast |
-| `saturation` | 0.4 … 1.8 | color | more/less-saturation |
-| `temperature` | −1 … +1 | whiteBalance | warmer, cooler |
-| `sharpen` | 0 … 1 | sharpness | sharpen, soften (+ loosen for over-tight crops) |
+While the current prototype focuses on discovering and improving the best
+moments hidden inside videos, Loopic can become a complete AI visual storytelling
+assistant.
 
-Overall score = 0.6·mean + 0.4·worst axis, so one bad axis can't hide
-behind five good ones. Correction mechanics (all visible in the UI):
+Future directions:
 
-- judge hints are directions only (`brighten`, `shift-left`, `tighten`, ...);
-  the loop picks magnitudes
-- repeated hint → keep step; flipped hint → halve step (binary-search settling)
-- a correction that drops the overall score > 0.5 is **reverted** and the
-  step halved (backfire guard)
-- shift clamped at the frame edge → tighten first to make room
-- no actionable hint left → stop early, flaws are in the source
+1. **Personalized AI aesthetic model** - learn from saved photos, preferred
+   styles, previous editing choices, and engagement patterns to understand what
+   makes a photo feel like each user.
+2. **Advanced style transformation** - create CCD camera aesthetics, Y2K styles,
+   film photography, cinematic color grading, magazine/editorial looks, meme
+   templates, and platform-specific formats.
+3. **Intelligent content repurposing** - transform videos into Instagram posts,
+   TikTok thumbnails, YouTube thumbnails, profile photos, highlight covers, and
+   promotional materials.
+4. **AI creative assistant for professionals** - support photo culling, batch
+   editing suggestions, consistent style matching, client-specific preferences,
+   and faster post-production workflows.
+5. **Photo intelligence SDK** - let camera apps, social platforms, creator tools,
+   sports/event platforms, memory apps, and travel apps integrate Loopic as an AI
+   layer for understanding which moments matter.
 
-### Editor backends (`local` | `zero`, toggle in the UI)
+Today, Loopic finds the best photos hidden inside videos. Tomorrow, Loopic
+becomes the AI that understands every visual moment worth remembering.
 
-One `Editor` interface (`server/src/backends/editor.ts`); Loop 2 never
-knows which is active.
+## Repo Layout
 
-- `local` (default): sharp-based recipe rendering in-process. Fast — the
-  in-loop demo path.
-- `zero`: Zero.xyz-driven with the same recipe interface — live catalog
-  discovery, remote invocation when wallet + budget allow, local render
-  with honest external-call latency otherwise.
-- Recommended demo config: `local` in the loop, plus the **Zero.xyz pro
-  flourish** — a one-shot enhancement pass on the winning frame only,
-  outside the loop (toggleable on the winner card).
-
-### External-system slots (mock-first)
-
-| Slot | Interface | Status |
-|---|---|---|
-| Frame extraction | `FrameExtractor` | **real** — bundled ffmpeg-static |
-| Fast frame scorer | `FrameScorer` | **real** — laplacian sharpness / exposure / edge-energy interest |
-| Vision judge | `VisionJudge` | **real** — pixel heuristics or OpenAI / Gemini / Claude / OpenRouter / AWS Bedrock via config |
-| Editor `local` | `Editor` | **real** — sharp |
-| Editor `zero` | `Editor` | **real discovery** via @zeroxyz/cli; paid invocation gated on wallet + budget |
-| Compute | `ComputeRunner` | **real** — Akash-aware (env detection + task timing); full-app SDL in `deploy/` |
-| Image hosting | `S3Publisher` | **real** — AWS S3 presigned URLs when a bucket is configured |
-| Data layer | `DataStore` | Nexla slot — mock (in-memory) |
-
-## UI (demo flow)
-
-1. Drop a video (or sample reel), set N, pick the editor backend.
-2. **Loop 1** — filmstrip of extracted frames re-ranks live; round cards
-   show quality/variety climbing and which near-dupe got banned.
-3. **Loop 2** — one card per pick: round 1 vs latest side-by-side, a
-   scrubber to replay any round's image, per-axis meters + one-line
-   reasons, and the exact correction taken each round.
-4. **Finished set** — winner starred with the Zero.xyz pro-pass toggle;
-   every card shows which backend produced it.
-
-## Repo layout
-
-```
-server/src/core/loop.ts          the Loop abstraction (act/observe/score/correct)
-server/src/loops/                the two LoopSpecs
-server/src/backends/             Editor / VisionJudge / FrameScorer / stubs (+ mocks)
-server/src/media/                ffmpeg + sharp pixel analysis
-server/src/api/                  run orchestrator + SSE event types
-server/src/server.ts             Express app (upload, run, events, media)
-server/src/demo.ts               all-mock console demo
+```txt
+server/src/core/loop.ts          reusable act/observe/score/correct loop
+server/src/loops/                frame selection and edit refinement specs
+server/src/backends/             editor, judge, scorer, AWS, Zero.xyz, compute
+server/src/media/                ffmpeg and sharp image analysis
+server/src/api/                  run orchestration and event types
+server/src/server.ts             Express API, uploads, SSE, static web serving
 web/                             React + Vite frontend
 ```

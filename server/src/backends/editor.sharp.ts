@@ -115,7 +115,7 @@ export class ZeroEditor implements Editor {
         const jpeg = await readFile(editedPath);
         let publicUrl: string;
         if (this.s3) {
-          publicUrl = await this.s3.publish(jpeg, `topshot/${image.frameId}-${Date.now()}.jpg`);
+          publicUrl = await this.s3.publish(jpeg, `loopic/${image.frameId}-${Date.now()}.jpg`);
           hostedVia = "AWS S3 presigned URL";
         } else {
           publicUrl = await publishTemp(jpeg);
@@ -185,7 +185,7 @@ async function publishTemp(jpeg: Buffer): Promise<string> {
     const res = await fetch("https://0x0.st", {
       method: "POST",
       body: form,
-      headers: { "user-agent": "topshot/1.0 (hackathon demo; temp image for paid enhancement call)" },
+      headers: { "user-agent": "loopic/1.0 (hackathon demo; temp image for paid enhancement call)" },
     });
     if (!res.ok) throw new Error(`0x0.st upload failed: ${res.status}`);
     const url = (await res.text()).trim();

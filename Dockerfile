@@ -1,4 +1,4 @@
-# Topshot — single container serving API + built web UI.
+# Loopic — single container serving API + built web UI.
 # Used for the Akash deployment (deploy/akash.sdl.yaml) and works on any
 # container host (AWS ECS/App Runner included).
 FROM node:22-slim AS build
@@ -17,7 +17,7 @@ COPY package.json package-lock.json ./
 COPY server/package.json server/
 RUN npm ci -w server --omit=dev && npm cache clean --force
 COPY server server
-COPY topshot.config.json ./
+COPY loopic.config.json ./
 COPY --from=build /app/web/dist web/dist
 
 EXPOSE 4000

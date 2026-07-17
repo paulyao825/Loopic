@@ -1,5 +1,5 @@
 /**
- * The single Loop abstraction that is the spine of Topshot.
+ * The single Loop abstraction that is the spine of Loopic.
  *
  * A Loop iterates:  act -> observe -> score -> correct
  * until the score clears the bar or the round cap is hit.

@@ -184,6 +184,7 @@ export class RunManager {
     }
 
     // ── Final flourish: Zero.xyz pro pass on the winner only ────────
+    if (results.length === 0) throw new Error("no frames were selected for editing");
     const winner = results.reduce((a, b) => (b.score > a.score ? b : a));
     let flourishUrl: string | undefined;
     if (req.flourish && results.length > 0) {

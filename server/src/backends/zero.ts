@@ -36,7 +36,7 @@ export interface ZeroDiscovery {
  * Thin client around the real @zeroxyz/cli. Capability discovery
  * (`zero search`) is free and needs no account. Paid invocation
  * (`zero fetch`) requires `zero auth login` + a funded USDC wallet and
- * an explicit maxPayUsdc budget in topshot.config.json.
+ * an explicit maxPayUsdc budget in loopic.config.json.
  */
 export class ZeroClient {
   private readonly bin: string | undefined;
@@ -151,7 +151,7 @@ export class ZeroClient {
       : !wallet
         ? "discovered via live Zero search — invocation needs `zero auth login` + funded wallet"
         : this.cfg.maxPayUsdc <= 0
-          ? "discovered via live Zero search — set zero.maxPayUsdc in topshot.config.json to allow spending"
+          ? "discovered via live Zero search — set zero.maxPayUsdc in loopic.config.json to allow spending"
           : `capability costs ${capability.pricing}, over the $${this.cfg.maxPayUsdc} budget`;
     return { query, capability, alternates, invocable, note };
   }

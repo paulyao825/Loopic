@@ -1,5 +1,5 @@
 {
-  "name": "topshot",
+  "name": "loopic",
   "private": true,
   "workspaces": [
     "server",

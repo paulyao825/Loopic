@@ -17,10 +17,18 @@ function runReducer(state: RunState, action: RunEvent | { type: "reset" } | { ty
 const PHASE_LABEL: Record<string, string> = {
   uploading: "uploading video",
   extracting: "extracting frames",
-  loop1: "loop 1 · selecting frames",
-  loop2: "loop 2 · refining edits",
+  loop1: "loop 1 / selecting frames",
+  loop2: "loop 2 / refining edits",
   flourish: "zero.xyz pro pass",
 };
+
+const FUTURE_DIRECTIONS = [
+  "Personalized AI aesthetic models",
+  "Advanced style transformation",
+  "Intelligent content repurposing",
+  "AI creative assistant for professionals",
+  "Photo intelligence SDK for creator platforms",
+];
 
 export default function App() {
   const [state, dispatch] = useReducer(runReducer, initialRunState);
@@ -34,7 +42,10 @@ export default function App() {
       dispatch({ type: "uploading" });
       const videoId = await videoIdPromise;
       const runId = await startRun({ videoId, ...opts });
-      unsubscribe.current = subscribeToRun(runId, dispatch);
+      unsubscribe.current = subscribeToRun(runId, dispatch, (message) => {
+        setUiError(message);
+        dispatch({ type: "reset" });
+      });
     } catch (err) {
       setUiError(String(err instanceof Error ? err.message : err));
       dispatch({ type: "reset" });
@@ -50,9 +61,9 @@ export default function App() {
       <header className="topbar">
         <div className="brand">
           <h1>
-            Topshot<em>.</em>
+            Loopic<em>.</em>
           </h1>
-          <span className="tagline">a self-correcting photo agent</span>
+          <span className="tagline">the self-improving photo gazette</span>
         </div>
         <div className="topbar-right">
           {state.config && (
@@ -81,15 +92,20 @@ export default function App() {
         <main className="hero">
           <div className="hero-copy fade-in">
             <h2>
-              Your video has a best shot.
+              Your video has 43,200 frames.
               <br />
-              <span className="grad">The agent finds it, then fixes it.</span>
+              <span className="red-ink">Only a few deserve to live.</span>
             </h2>
             <p>
-              Topshot extracts frames, selects the strongest and most varied, then edits each one in a
-              critique-and-refine loop until a vision judge clears the bar. Every round is visible: the score climbs,
-              each correction is named, and missteps are reverted.
+              Loopic turns raw video into stunning photos. It finds the best moments, critiques its own edits, tries
+              again, and learns through visible self-improving loops.
             </p>
+            <div className="notice-strip">BREAKING / AI PHOTO DIRECTOR NOW JUDGING ITS OWN WORK</div>
+            <div className="future-ledger">
+              {FUTURE_DIRECTIONS.map((item) => (
+                <span key={item}>{item}</span>
+              ))}
+            </div>
           </div>
           <UploadPanel
             busy={state.phase === "uploading"}
@@ -115,7 +131,7 @@ export default function App() {
                 <span className="loop-tag">LOOP 2</span>
                 <h2>Edit refinement</h2>
                 <span className="muted">
-                  one bounded correction per round, lowest-scoring axis first — bar {state.config?.bar ?? 7.5}
+                  one bounded correction per round, lowest-scoring axis first / bar {state.config?.bar ?? 7.5}
                 </span>
               </header>
               <div className="loop2-grid">
@@ -137,7 +153,7 @@ export default function App() {
 
           {state.phase === "flourish" && (
             <section className="card fade-in">
-              <Spinner label={`zero.xyz pro enhancement on ${state.flourish?.frameId}…`} />
+              <Spinner label={`zero.xyz pro enhancement on ${state.flourish?.frameId}...`} />
             </section>
           )}
 
@@ -146,8 +162,8 @@ export default function App() {
       )}
 
       <footer className="footer">
-        One loop abstraction, two instances. Pluggable slots for Akash compute, Nexla data, Zero.xyz editing, and AWS
-        inference.
+        Built with Akash, Amazon Web Services, Cursor, TypeScript, and Zero.xyz. Today, Loopic finds the best photos
+        hidden inside videos; tomorrow, it understands every visual moment worth remembering.
       </footer>
     </div>
   );

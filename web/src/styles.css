@@ -1,21 +1,24 @@
 :root {
-  --bg: #faf9f6;
-  --surface: #ffffff;
-  --border: #e7e3da;
-  --border-strong: #d8d3c8;
-  --ink: #1c1a17;
-  --muted: #706a5e;
-  --faint: #a39c8e;
-  --accent: #31614a; /* deep leaf green */
-  --accent-soft: #eef3ee;
+  --bg: #8a857c;
+  --paper: #f4efe3;
+  --surface: #f6f1e5;
+  --border: #c8bfa8;
+  --border-strong: #1a1815;
+  --ink: #1a1815;
+  --muted: #625b4d;
+  --faint: #8d8370;
+  --accent: #b3271b;
+  --accent-soft: #efe0d5;
   --good: #31614a;
   --warn: #9a6b1f;
   --warn-soft: #faf3e3;
-  --bad: #a3402f;
+  --bad: #b3271b;
   --bad-soft: #f9ece8;
   --serif: "Newsreader", Georgia, serif;
-  --sans: "Inter", system-ui, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --display: "Playfair Display", Georgia, serif;
+  --poster: "Anton", Impact, sans-serif;
+  --sans: "Newsreader", Georgia, serif;
+  --mono: "Courier Prime", ui-monospace, monospace;
 }
 
 * {
@@ -37,14 +40,18 @@ body {
   max-width: 1120px;
   margin: 0 auto;
   padding: 0 32px 72px;
+  background:
+    radial-gradient(circle at 1px 1px, rgba(26, 24, 21, 0.08) 1px, transparent 0) 0 0 / 9px 9px,
+    var(--paper);
+  min-height: 100vh;
 }
 
 h1,
 h2,
 h3 {
-  font-family: var(--serif);
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  font-family: var(--display);
+  font-weight: 900;
+  letter-spacing: 0;
 }
 
 .mono {
@@ -62,7 +69,7 @@ h3 {
   justify-content: space-between;
   align-items: center;
   padding: 26px 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 4px solid var(--border-strong);
   margin-bottom: 36px;
   flex-wrap: wrap;
   gap: 12px;
@@ -76,18 +83,23 @@ h3 {
 
 .brand h1 {
   margin: 0;
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 34px;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .brand h1 em {
-  font-style: italic;
-  font-weight: 400;
+  color: var(--accent);
+  font-style: normal;
+  font-weight: 900;
 }
 
 .tagline {
-  color: var(--faint);
+  color: var(--muted);
+  font-family: var(--mono);
   font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .topbar-right {
@@ -99,10 +111,10 @@ h3 {
 /* ── cards / layout ─────────────────────────────────── */
 .card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 0;
   padding: 24px 26px;
-  box-shadow: 0 1px 2px rgba(28, 26, 23, 0.04);
+  box-shadow: none;
 }
 
 .card-head {
@@ -143,10 +155,11 @@ h3 {
   font-size: 10.5px;
   letter-spacing: 0.14em;
   padding: 3px 8px;
-  border-radius: 3px;
-  color: var(--muted);
-  background: var(--bg);
+  border-radius: 0;
+  color: var(--paper);
+  background: var(--ink);
   border: 1px solid var(--border-strong);
+  text-transform: uppercase;
 }
 
 .loop-tag.done {
@@ -167,7 +180,9 @@ h3 {
   grid-template-columns: 1.1fr 1fr;
   gap: 56px;
   align-items: center;
-  padding: 48px 0;
+  padding: 44px 0 52px;
+  border-top: 3px double var(--border-strong);
+  border-bottom: 3px double var(--border-strong);
 }
 
 @media (max-width: 900px) {
@@ -177,31 +192,63 @@ h3 {
 }
 
 .hero-copy h2 {
-  font-size: 40px;
-  line-height: 1.12;
+  font-family: var(--display);
+  font-size: 52px;
+  line-height: 1.02;
   margin: 0 0 20px;
-  font-weight: 500;
+  font-weight: 900;
 }
 
-.grad {
-  font-style: italic;
+.red-ink {
   color: var(--accent);
 }
 
 .hero-copy p {
   color: var(--muted);
-  line-height: 1.7;
+  line-height: 1.55;
   max-width: 52ch;
-  font-size: 15.5px;
+  font-size: 17px;
+  text-align: justify;
+}
+
+.notice-strip {
+  display: inline-block;
+  margin: 12px 0 16px;
+  padding: 9px 14px;
+  background: var(--accent);
+  color: var(--paper);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.future-ledger {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+  max-width: 520px;
+  border-top: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border-strong);
+  padding: 10px 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.future-ledger span::before {
+  content: "FUTURE / ";
+  color: var(--accent);
+  font-weight: 700;
 }
 
 .dropzone {
-  border: 1px dashed var(--border-strong);
-  border-radius: 6px;
+  border: 2px dashed var(--border-strong);
+  border-radius: 0;
   padding: 36px 20px;
   text-align: center;
   cursor: pointer;
-  background: var(--bg);
+  background: var(--paper);
   transition: border-color 0.15s, background 0.15s;
 }
 
@@ -271,7 +318,7 @@ h3 {
 .segmented {
   display: inline-flex;
   border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border-radius: 0;
   overflow: hidden;
   background: var(--surface);
 }
@@ -292,7 +339,7 @@ h3 {
 
 .segmented button.on {
   background: var(--ink);
-  color: var(--surface);
+  color: var(--paper);
 }
 
 .actions {
@@ -301,11 +348,13 @@ h3 {
 }
 
 .btn {
-  border-radius: 6px;
+  border-radius: 0;
   padding: 10px 20px;
   font-size: 14.5px;
-  font-family: var(--sans);
-  font-weight: 500;
+  font-family: var(--mono);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   cursor: pointer;
   border: 1px solid var(--border-strong);
   background: var(--surface);
@@ -321,11 +370,12 @@ h3 {
 .btn.primary {
   background: var(--ink);
   border-color: var(--ink);
-  color: var(--surface);
+  color: var(--paper);
 }
 
 .btn.primary:not(:disabled):hover {
-  background: #33302a;
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .btn.ghost:hover {
@@ -356,7 +406,7 @@ h3 {
 
 .film-cell img {
   width: 100%;
-  border-radius: 4px;
+  border-radius: 0;
   display: block;
   border: 2px solid transparent;
 }
@@ -389,9 +439,9 @@ h3 {
 
 .round-card {
   flex: 0 0 300px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  background: var(--paper);
+  border: 1px solid var(--border-strong);
+  border-radius: 0;
   padding: 14px 16px;
 }
 
@@ -430,14 +480,14 @@ h3 {
 
 .meter {
   height: 4px;
-  border-radius: 99px;
+  border-radius: 0;
   background: #ece8df;
   overflow: hidden;
 }
 
 .meter-fill {
   height: 100%;
-  border-radius: 99px;
+  border-radius: 0;
   background: var(--accent);
   transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -465,7 +515,7 @@ h3 {
   padding: 9px 13px;
   border-left: 2px solid var(--accent);
   background: var(--accent-soft);
-  border-radius: 0 4px 4px 0;
+  border-radius: 0;
   font-size: 12.5px;
   color: #2c4a3a;
 }
@@ -476,7 +526,7 @@ h3 {
   font-weight: 500;
   font-size: 12px;
   padding: 1px 8px;
-  border-radius: 3px;
+  border-radius: 0;
 }
 
 .pill.pass {
@@ -498,7 +548,7 @@ h3 {
   font-family: var(--mono);
   font-size: 11.5px;
   padding: 3px 10px;
-  border-radius: 3px;
+  border-radius: 0;
 }
 
 .status-chip.ok {
@@ -515,7 +565,7 @@ h3 {
   font-family: var(--mono);
   font-size: 10.5px;
   padding: 2px 8px;
-  border-radius: 3px;
+  border-radius: 0;
   margin-left: 8px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -539,7 +589,7 @@ h3 {
   font-family: var(--mono);
   font-size: 11.5px;
   padding: 4px 11px;
-  border-radius: 3px;
+  border-radius: 0;
   color: var(--muted);
   border: 1px solid var(--border);
   background: var(--surface);
@@ -582,7 +632,7 @@ h3 {
 
 .compare img {
   width: 100%;
-  border-radius: 4px;
+  border-radius: 0;
   display: block;
   background: var(--bg);
   border: 1px solid var(--border);
@@ -652,7 +702,7 @@ h3 {
 .result-card {
   margin: 0;
   position: relative;
-  border-radius: 6px;
+  border-radius: 0;
   overflow: hidden;
   border: 1px solid var(--border);
   background: var(--surface);
@@ -675,7 +725,7 @@ h3 {
 
 .result-card.winner {
   border-color: var(--accent);
-  box-shadow: 0 2px 10px rgba(49, 97, 74, 0.12);
+  box-shadow: 0 0 0 3px rgba(179, 39, 27, 0.14);
 }
 
 .winner-banner {
@@ -687,9 +737,9 @@ h3 {
   font-size: 10.5px;
   letter-spacing: 0.08em;
   padding: 3px 9px;
-  border-radius: 3px;
+  border-radius: 0;
   background: var(--ink);
-  color: var(--surface);
+  color: var(--paper);
 }
 
 /* ── misc ───────────────────────────────────────────── */
@@ -720,7 +770,7 @@ h3 {
   background: var(--bad-soft);
   border: 1px solid #e5c4bb;
   color: var(--bad);
-  border-radius: 6px;
+  border-radius: 0;
   padding: 12px 16px;
   margin-bottom: 18px;
   font-size: 13.5px;
@@ -730,7 +780,7 @@ h3 {
   background: var(--warn-soft);
   border: 1px solid #e8d9b8;
   color: var(--warn);
-  border-radius: 6px;
+  border-radius: 0;
   padding: 10px 16px;
   margin-bottom: 14px;
   font-size: 13.5px;
