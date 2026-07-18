@@ -16,6 +16,7 @@ env/
 # Topshot runtime artifacts (frames, edits, run logs)
 **/data/runs/
 **/data/uploads/
+**/data/feedback/
 *.log
 
 # OS / editor
