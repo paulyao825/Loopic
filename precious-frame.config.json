@@ -1,10 +1,10 @@
 {
   "$comment": "Precious Frame runtime config - reloaded on every run.",
   "judge": {
-    "$comment": "glm uses GLM_API_KEY. Missing keys or API errors fall back to local pixel scoring.",
-    "provider": "glm",
-    "model": "glm-4.6v-flash",
-    "baseUrl": "https://open.bigmodel.cn/api/paas/v4"
+    "$comment": "kimi uses MOONSHOT_API_KEY. Missing keys or API errors fall back to local pixel scoring.",
+    "provider": "kimi",
+    "model": "kimi-k2.6",
+    "baseUrl": "https://api.moonshot.cn/v1"
   },
   "loop": {
     "$comment": "bar is the score needed to stop early.",

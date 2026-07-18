@@ -1,4 +1,4 @@
-import type { RunEvent } from "./types";
+import type { PhotoPreference, RunEvent } from "./types";
 
 const API_BASE = (
   new URLSearchParams(window.location.search).get("api") ??
@@ -20,11 +20,12 @@ const MAX_FRAME_BYTES = 120 * 1024;
 export function runVideo(
   file: File,
   n: number,
+  preference: PhotoPreference,
   onEvent: (event: RunEvent) => void,
   onError?: (message: string) => void,
 ): () => void {
   const controller = new AbortController();
-  void streamRun(file, n, onEvent, controller.signal).catch((error) => {
+  void streamRun(file, n, preference, onEvent, controller.signal).catch((error) => {
     if (!controller.signal.aborted) onError?.(error instanceof Error ? error.message : String(error));
   });
   return () => controller.abort();
@@ -33,12 +34,14 @@ export function runVideo(
 async function streamRun(
   file: File,
   n: number,
+  preference: PhotoPreference,
   onEvent: (event: RunEvent) => void,
   signal: AbortSignal,
 ): Promise<void> {
   const extracted = await extractCandidateFrames(file, signal);
   const form = new FormData();
   form.append("n", String(n));
+  form.append("preference", preference);
   form.append("timestamps", JSON.stringify(extracted.map((frame) => frame.t)));
   extracted.forEach((frame, index) => {
     form.append("frames", frame.blob, `frame_${String(index + 1).padStart(3, "0")}.jpg`);

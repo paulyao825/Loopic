@@ -1,7 +1,7 @@
 # Precious Frame - AI visual storytelling assistant
 
 Precious Frame finds the best real photographs hidden inside videos. Upload a
-video and the app extracts candidate frames, asks GLM Vision to identify the
+video and the app extracts candidate frames, asks Kimi Vision to identify the
 strongest and most varied moments, then improves each selected frame through a
 visible critique-and-refine loop.
 
@@ -15,7 +15,8 @@ real frame from the uploaded video.
 ## Current prototype
 
 - extracts bounded candidate frames privately in the browser
-- scores composition, authentic moments, action, and visual storytelling with GLM-4.6V Flash
+- scores impact, story, composition, and technical quality with Kimi K2.6
+- lets each run favor balanced, people, competition, action, or scenic photography
 - combines vision judgment with local sharpness, exposure, color, and activity measurements
 - removes near-duplicates to return a varied photo set
 - improves crop, exposure, contrast, saturation, temperature, and sharpness with Sharp
@@ -32,34 +33,45 @@ real frame from the uploaded video.
 | Language | TypeScript | One typed codebase from UI to processing pipeline |
 | Video processing | Browser Canvas | Extracts real frames without uploading the full video |
 | Image processing | Sharp | Fast local crop, color, exposure, and detail edits |
-| Vision model | GLM-4.6V Flash | Selects meaningful frames and judges edit quality |
+| Vision model | Kimi K2.6 | Selects meaningful frames and judges edit quality |
 
-GLM Vision is the only external processing service. There are no wallet tools, paid
+Kimi Vision is the only external processing service. There are no wallet tools, paid
 enhancement brokers, or extra cloud SDKs in the application.
 
 ## Required setup
 
-GLM Vision uses Z.ai's Open Platform and requires one API key.
+Kimi Vision uses Moonshot's Open Platform and requires one API key.
 
-1. Create an API key in the Z.ai Open Platform.
+1. Create an API key in the Moonshot Open Platform.
 2. Copy `.env.example` to `.env`.
-3. Put the new key after `GLM_API_KEY=`.
+3. Put the new key after `MOONSHOT_API_KEY=`.
 4. Keep `.env` local. It is ignored by Git.
 
 ```dotenv
-GLM_API_KEY=your-new-key
-VISION_MODEL=glm-4.6v-flash
-VISION_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+MOONSHOT_API_KEY=your-new-key
+VISION_PROVIDER=kimi
+VISION_MODEL=kimi-k2.6
+VISION_BASE_URL=https://api.moonshot.cn/v1
 ```
 
 The server calls the official OpenAI-compatible endpoint:
 
 ```txt
-POST https://open.bigmodel.cn/api/paas/v4/chat/completions
+POST https://api.moonshot.cn/v1/chat/completions
 ```
 
-If `GLM_API_KEY` is missing or a model request fails, the run continues with
+If `MOONSHOT_API_KEY` is missing or a model request fails, the run continues with
 local pixel scoring and reports the fallback in the interface.
+
+## Photo preferences
+
+Each run can favor `Balanced`, `People & emotion`, `Competition`, `Action & energy`,
+or `Scenic & composed` photography. Kimi scores impact, story, composition, and
+technical quality, then the server applies the selected preference weights.
+
+The rubric is adapted from Professional Photographers of America's
+[12 Elements of a Merit Image](https://www.ppa.com/ppmag/articles/12-elements-of-a-merit-image)
+and World Press Photo's [judging criteria](https://www.worldpressphoto.org/contest/judging-process).
 
 ## Run locally
 
@@ -97,9 +109,9 @@ npm run build
 ```jsonc
 {
   "judge": {
-    "provider": "glm",
-    "model": "glm-4.6v-flash",
-    "baseUrl": "https://open.bigmodel.cn/api/paas/v4"
+    "provider": "kimi",
+    "model": "kimi-k2.6",
+    "baseUrl": "https://api.moonshot.cn/v1"
   },
   "loop": {
     "bar": 7.5,
@@ -120,15 +132,15 @@ act -> observe -> score -> correct -> repeat
 
 | Loop | Goal | Output |
 | --- | --- | --- |
-| Loop 1 | Combine GLM aesthetic judgment, local image quality, and diversity | Candidate photos |
+| Loop 1 | Combine preference-aware Kimi judgment, local image quality, and diversity | Candidate photos |
 | Loop 2 | Judge and improve each candidate through bounded edits | Refined photos |
 
-Loop 1 sends small batches of extracted images to GLM-4.6V Flash. The model scores
-composition, a clear subject, human emotion or action, and storytelling value.
+Loop 1 sends small batches of extracted images to Kimi K2.6. The model scores
+impact, story, composition, and technical quality using the selected photo preference.
 The pipeline combines that score with local measurements and removes visually
 similar frames.
 
-Loop 2 changes one parameter at a time. GLM Vision evaluates crop and framing,
+Loop 2 changes one parameter at a time. Kimi Vision compares the source and edited frame, then evaluates crop and framing,
 exposure, contrast, color, white balance, and sharpness, then returns a concrete
 direction such as `brighten`, `tighten`, or `warmer`. Sharp applies that change
 to the original frame. The loop stops when it clears the score bar or reaches
@@ -142,9 +154,9 @@ frames, so the full video never crosses the serverless request boundary. The
 API processes those frames and returns progress plus generated images in the
 same response, avoiding cross-instance memory and `/tmp` dependencies.
 
-Set `GLM_API_KEY` in the deployment environment. The included `Dockerfile` also
-serves the API and built website from one Node.js container when a container
-host is preferred.
+Set `MOONSHOT_API_KEY` in the deployment environment. The included `Dockerfile`
+also serves the API and built website from one Node.js container when a
+container host is preferred.
 
 ## What's next for Precious Frame
 
@@ -174,7 +186,7 @@ becomes the AI that understands every visual moment worth remembering.
 ```txt
 server/src/core/loop.ts          reusable act/observe/score/correct loop
 server/src/loops/                frame selection and edit refinement
-server/src/backends/             GLM judge/scorer and Sharp editor
+server/src/backends/             Kimi judge/scorer and Sharp editor
 server/src/media/                local image analysis
 server/src/api/                  run orchestration and streamed event types
 server/src/server.ts             Express frame API, SSE, and static web

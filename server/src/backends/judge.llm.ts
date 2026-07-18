@@ -1,8 +1,11 @@
 import { readFile } from "node:fs/promises";
 import type { VisionJudge } from "./judge.js";
 import type { Critique, AxisCritique } from "../core/loop.js";
-import type { EditedImage } from "../domain/types.js";
+import type { EditedImage, Frame } from "../domain/types.js";
 import type { JudgeConfig } from "../appConfig.js";
+import type { PhotoPreference } from "../domain/photoPreference.js";
+import { preferenceProfile } from "../domain/photoPreference.js";
+import { requestKimi } from "./kimi.js";
 
 export const JUDGE_AXES = ["cropFraming", "exposure", "contrast", "color", "whiteBalance", "sharpness"] as const;
 
@@ -17,60 +20,67 @@ export const JUDGE_HINTS = [
   "sharpen", "soften",
 ] as const;
 
-export const JUDGE_SYSTEM_PROMPT = `You are a photo-edit judge inside an automated critique-and-refine loop.
-Score the image 0-10 on EXACTLY these axes (concrete flaws only, never vague "beauty"):
-- cropFraming: subject centered and filling the frame? (tighten also means zoom in)
-- exposure: midtone placement, crushed shadows, blown highlights
-- contrast: flat vs harsh tonal range
-- color: saturation — washed out vs oversaturated
-- whiteBalance: warm/cool color cast
-- sharpness: apparent detail (over-tight crops look soft when upscaled)
-For each axis give a one-line reason and ONE hint from: ${JUDGE_HINTS.join(", ")}.
-Hints are directions for the NEXT single edit step (e.g. "shift-right" moves the crop window right). The loop picks magnitudes, not you. Use "none" when the axis needs nothing.
-Respond ONLY with JSON: {"cropFraming":{"score":n,"reason":"...","hint":"..."},"exposure":{...},"contrast":{...},"color":{...},"whiteBalance":{...},"sharpness":{...}}`;
+export function buildEditJudgePrompt(preference: PhotoPreference): string {
+  const profile = preferenceProfile(preference);
+  return `You are a professional photo-edit judge inside an automated critique-and-refine loop.
+Apply criteria adapted from PPA merit-image judging and World Press Photo visual quality, story, and authenticity standards.
+You receive two images in order: the original source frame, then the edited candidate. Judge only the edited candidate,
+but compare it with the source so the edit does not remove important story, context, expression, gesture, or atmosphere.
+User preference: ${profile.label}. ${profile.focus}
 
-/** GLM vision judge through Z.ai's OpenAI-compatible chat completions API. */
+Score the edited candidate 0-10 on exactly these actionable axes:
+- cropFraming: intentional visual hierarchy, balance, edge control, gaze/action room, useful negative space, and retained context
+- exposure: subject-appropriate brightness and accidental crushed shadows or blown highlights; preserve intentional mood
+- contrast: useful tonal separation without unintended flatness or harsh clipping
+- color: coherent, subject-appropriate saturation and skin/color relationships; muted or vivid color may be intentional
+- whiteBalance: unwanted color cast only; do not neutralize an intentional warm or cool atmosphere
+- sharpness: critical subject detail without halos or brittle oversharpening; meaningful motion blur is allowed
+
+Do not require centered subjects, tight framing, neutral color, high saturation, or maximum sharpness.
+For each axis give one short, visible, specific reason and exactly one hint from: ${JUDGE_HINTS.join(", ")}.
+Hints direct the next single supported edit; the loop chooses magnitude. Use "none" when no supported edit is clearly beneficial.
+A score of 8 or higher means no meaningful correction is needed on that axis.
+Respond only with JSON: {"cropFraming":{"score":n,"reason":"...","hint":"..."},"exposure":{...},"contrast":{...},"color":{...},"whiteBalance":{...},"sharpness":{...}}`;
+}
+
+/** Kimi vision judge through Moonshot's OpenAI-compatible chat completions API. */
 export class LlmVisionJudge implements VisionJudge {
   constructor(
     private readonly resolvePath: (uri: string) => string,
     private readonly cfg: JudgeConfig,
+    private readonly preference: PhotoPreference,
   ) {}
 
-  async critique(image: EditedImage): Promise<Critique> {
-    const jpeg = await readFile(this.resolvePath(image.uri));
-    const b64 = jpeg.toString("base64");
-    const userText = `Applied recipe: ${JSON.stringify(image.recipe)}. Judge the image.`;
+  async critique(source: Frame, image: EditedImage): Promise<Critique> {
+    const [sourceJpeg, editedJpeg] = await Promise.all([
+      readFile(source.uri),
+      readFile(this.resolvePath(image.uri)),
+    ]);
 
-    return parseCritique(await this.callGlm(b64, userText));
+    return parseCritique(await this.callKimi(sourceJpeg.toString("base64"), editedJpeg.toString("base64"), image));
   }
 
-  private async callGlm(b64: string, userText: string): Promise<string> {
-    const res = await fetch(`${this.cfg.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${this.cfg.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: this.cfg.model,
+  private callKimi(sourceB64: string, editedB64: string, image: EditedImage): Promise<string> {
+    return requestKimi({
+      cfg: this.cfg,
+      label: "edit judge",
+      body: {
         max_tokens: 700,
-        temperature: 0,
-        thinking: { type: "disabled" },
         messages: [
-          { role: "system", content: JUDGE_SYSTEM_PROMPT },
+          { role: "system", content: buildEditJudgePrompt(this.preference) },
           {
             role: "user",
             content: [
-              { type: "image_url", image_url: { url: `data:image/jpeg;base64,${b64}` } },
-              { type: "text", text: userText },
+              { type: "text", text: "Original source frame:" },
+              { type: "image_url", image_url: { url: `data:image/jpeg;base64,${sourceB64}` } },
+              { type: "text", text: "Edited candidate:" },
+              { type: "image_url", image_url: { url: `data:image/jpeg;base64,${editedB64}` } },
+              { type: "text", text: `Applied recipe: ${JSON.stringify(image.recipe)}. Judge the edited candidate.` },
             ],
           },
         ],
-      }),
+      },
     });
-    if (!res.ok) throw new Error(`GLM judge failed: ${res.status} ${(await res.text()).slice(0, 300)}`);
-    const body = (await res.json()) as { choices: Array<{ message: { content: string } }> };
-    return body.choices[0]?.message.content ?? "";
   }
 }
 

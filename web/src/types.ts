@@ -1,5 +1,12 @@
 /** Mirrors server/src/api/events.ts wire format. */
 
+export type PhotoPreference =
+  | "balanced"
+  | "people-emotion"
+  | "competition"
+  | "action-energy"
+  | "scenic-composed";
+
 export interface AxisCritique {
   score: number;
   reason: string;
@@ -51,6 +58,8 @@ export type RunEvent =
       type: "run:init";
       runId: string;
       n: number;
+      preference: PhotoPreference;
+      preferenceLabel: string;
       selector: string;
       judge: string;
       judgeNote?: string;
@@ -92,6 +101,8 @@ export interface RunState {
   error?: string;
   config?: {
     n: number;
+    preference: PhotoPreference;
+    preferenceLabel: string;
     selector: string;
     judge: string;
     judgeNote?: string;
@@ -123,6 +134,8 @@ export function reduceEvent(state: RunState, e: RunEvent): RunState {
         runId: e.runId,
         config: {
           n: e.n,
+          preference: e.preference,
+          preferenceLabel: e.preferenceLabel,
           selector: e.selector,
           judge: e.judge,
           judgeNote: e.judgeNote,

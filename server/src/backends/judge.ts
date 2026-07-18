@@ -1,13 +1,13 @@
 import type { Critique } from "../core/loop.js";
-import type { EditedImage } from "../domain/types.js";
+import type { EditedImage, Frame } from "../domain/types.js";
 
 /**
  * Vision-model judge for Loop 2. Scores on CONCRETE axes only —
  * structured output, never vague beauty. Implementations: pixel
- * local pixel heuristics or the configured GLM vision model.
+ * local pixel heuristics or the configured Kimi vision model.
  */
 export interface VisionJudge {
-  critique(image: EditedImage): Promise<Critique>;
+  critique(source: Frame, image: EditedImage): Promise<Critique>;
 }
 
 /**
@@ -24,15 +24,15 @@ export class ResilientJudge implements VisionJudge {
     private readonly onFallback: (err: unknown) => void,
   ) {}
 
-  async critique(image: EditedImage): Promise<Critique> {
+  async critique(source: Frame, image: EditedImage): Promise<Critique> {
     if (!this.failedOver) {
       try {
-        return await this.primary.critique(image);
+        return await this.primary.critique(source, image);
       } catch (err) {
         this.failedOver = true;
         this.onFallback(err);
       }
     }
-    return this.fallback.critique(image);
+    return this.fallback.critique(source, image);
   }
 }

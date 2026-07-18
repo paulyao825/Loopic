@@ -70,7 +70,7 @@ export default function App() {
     setUiError(undefined);
     unsubscribe.current?.();
     dispatch({ type: "uploading" });
-    unsubscribe.current = runVideo(file, opts.n, dispatch, (message) => {
+    unsubscribe.current = runVideo(file, opts.n, opts.preference, dispatch, (message) => {
       setUiError(message);
       dispatch({ type: "reset" });
     });
@@ -179,7 +179,7 @@ export default function App() {
           <strong>Precious Frame.</strong>
           <span>AI visual storytelling assistant</span>
         </div>
-        <span>Built with React, Express, TypeScript, Canvas, Sharp, and GLM Vision.</span>
+        <span>Built with React, Express, TypeScript, Browser Canvas, Sharp, and Kimi Vision.</span>
         <a href={GITHUB_URL} target="_blank" rel="noreferrer">Source on GitHub ↗</a>
       </footer>
     </div>
@@ -355,14 +355,14 @@ function LandingPage({ busy, onRunFile }: { busy: boolean; onRunFile: (file: Fil
           <h2>A visible, inspectable AI workflow.</h2>
         </header>
         <div className="stack-grid">
-          <article><strong>GLM-4.6V</strong><span>Multimodal frame selection and concrete edit judgment</span></article>
+          <article><strong>Kimi K2.6</strong><span>Preference-aware frame selection and concrete edit judgment</span></article>
           <article><strong>Browser Canvas</strong><span>Private, size-safe frame extraction from the selected video</span></article>
           <article><strong>Sharp</strong><span>Local crop, color, exposure, and detail adjustments</span></article>
           <article><strong>React + Express</strong><span>Upload interface, progress stream, and results</span></article>
           <article><strong>TypeScript</strong><span>One typed workflow from API to interface</span></article>
         </div>
         <p className="stack-note">
-          GLM Vision is the only external processing service. Video extraction runs in the browser, image edits run locally, and the workflow
+          Kimi Vision is the only external processing service. Video extraction runs in the browser, image edits run locally, and the workflow
           falls back to local image analysis when the vision API is unavailable.
         </p>
       </section>

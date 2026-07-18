@@ -7,6 +7,7 @@ import express from "express";
 import cors from "cors";
 import multer from "multer";
 import { RunManager } from "./api/orchestrator.js";
+import { isPhotoPreference } from "./domain/photoPreference.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_DATA_DIR = process.env.VERCEL ? "/tmp/precious-frame-data" : path.resolve(__dirname, "../data");
@@ -47,6 +48,11 @@ app.post("/api/run", upload.array("frames", 24), async (req, res) => {
   const files = Array.isArray(req.files) ? req.files : [];
   if (files.length === 0) return res.status(400).json({ error: "no video frames" });
 
+  const rawPreference = req.body?.preference;
+  if (rawPreference !== undefined && !isPhotoPreference(rawPreference)) {
+    return res.status(400).json({ error: "unknown photo preference" });
+  }
+
   let timestamps: number[] = [];
   try {
     const parsed = JSON.parse(String(req.body?.timestamps ?? "[]"));
@@ -69,7 +75,7 @@ app.post("/api/run", upload.array("frames", 24), async (req, res) => {
   res.setHeader("X-Accel-Buffering", "no");
   res.flushHeaders();
 
-  await runs.run({ frames, n: shotCount }, (event) => {
+  await runs.run({ frames, n: shotCount, preference: rawPreference ?? "balanced" }, (event) => {
     const payload = INLINE_MEDIA ? inlineMedia(event) : event;
     res.write(`data: ${JSON.stringify(payload)}\n\n`);
   });

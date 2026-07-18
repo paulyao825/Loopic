@@ -379,6 +379,60 @@ h3 {
   margin: 22px 0;
 }
 
+.preference-control {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.preference-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--rule-soft);
+  border-left: 1px solid var(--rule-soft);
+}
+
+.preference-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 9px;
+  align-items: start;
+  min-width: 0;
+  padding: 10px;
+  border-right: 1px solid var(--rule-soft);
+  border-bottom: 1px solid var(--rule-soft);
+  background: var(--paper);
+  cursor: pointer;
+}
+
+.preference-option:hover,
+.preference-option.selected {
+  background: var(--accent-soft);
+}
+
+.preference-option input {
+  margin: 3px 0 0;
+  accent-color: var(--accent);
+}
+
+.preference-option strong,
+.preference-option small {
+  display: block;
+  letter-spacing: 0;
+}
+
+.preference-option strong {
+  font-size: 12px;
+}
+
+.preference-option small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
 .control-label {
   display: block;
   margin-bottom: 7px;
@@ -1377,6 +1431,10 @@ h3 {
 
   .dropzone {
     min-height: 148px;
+  }
+
+  .preference-grid {
+    grid-template-columns: 1fr;
   }
 
   .editorial-visual {

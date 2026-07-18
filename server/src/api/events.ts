@@ -1,5 +1,6 @@
 import type { Critique } from "../core/loop.js";
 import type { Recipe } from "../domain/types.js";
+import type { PhotoPreference } from "../domain/photoPreference.js";
 
 export interface FrameInfo {
   id: string;
@@ -21,6 +22,8 @@ export type RunEvent =
       type: "run:init";
       runId: string;
       n: number;
+      preference: PhotoPreference;
+      preferenceLabel: string;
       selector: string;
       judge: string;
       judgeNote?: string;

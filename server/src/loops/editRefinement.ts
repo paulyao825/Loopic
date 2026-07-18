@@ -78,7 +78,7 @@ export function makeEditRefinementLoop(
     },
 
     async observe(candidate) {
-      return judge.critique(candidate);
+      return judge.critique(frame, candidate);
     },
 
     async score(_candidate, critique) {

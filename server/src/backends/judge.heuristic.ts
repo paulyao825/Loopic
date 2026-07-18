@@ -1,18 +1,18 @@
 import type { VisionJudge } from "./judge.js";
 import type { Critique } from "../core/loop.js";
-import type { EditedImage } from "../domain/types.js";
+import type { EditedImage, Frame } from "../domain/types.js";
 import { clamp } from "../domain/types.js";
 import { analyzeImage, sharpnessScore } from "../media/analysis.js";
 
 /**
  * Real vision judge that needs no API key: scores the actual pixels of
- * the edited image on concrete axes. The GLM judge replaces it when
- * GLM_API_KEY is configured. The hint vocabulary is identical either way.
+ * the edited image on concrete axes. The Kimi judge replaces it when
+ * MOONSHOT_API_KEY is configured. The hint vocabulary is identical either way.
  */
 export class HeuristicVisionJudge implements VisionJudge {
   constructor(private readonly resolvePath: (uri: string) => string) {}
 
-  async critique(image: EditedImage): Promise<Critique> {
+  async critique(_source: Frame, image: EditedImage): Promise<Critique> {
     const s = await analyzeImage(this.resolvePath(image.uri));
     const { recipe } = image;
     const cropArea = recipe.crop.w * recipe.crop.h;
