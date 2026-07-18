@@ -10,7 +10,8 @@ import { RunManager } from "./api/orchestrator.js";
 import { generateSampleVideo } from "./media/ffmpeg.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.resolve(__dirname, "../data");
+const DEFAULT_DATA_DIR = process.env.VERCEL ? "/tmp/loopic-data" : path.resolve(__dirname, "../data");
+const DATA_DIR = path.resolve(process.env.LOOPIC_DATA_DIR ?? DEFAULT_DATA_DIR);
 const WEB_DIST = path.resolve(__dirname, "../../web/dist");
 const PORT = Number(process.env.PORT ?? 4000);
 
@@ -35,7 +36,7 @@ const upload = multer({
   limits: { fileSize: 300 * 1024 * 1024 },
 });
 
-const app = express();
+export const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/media", express.static(DATA_DIR, { maxAge: "1y", immutable: true }));
@@ -91,6 +92,10 @@ if (existsSync(WEB_DIST)) {
   app.get(/^(?!\/(api|media)\/).*/, (_req, res) => res.sendFile(path.join(WEB_DIST, "index.html")));
 }
 
-app.listen(PORT, () => {
-  console.log(`loopic server listening on http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`loopic server listening on http://localhost:${PORT}`);
+  });
+}
+
+export default app;
