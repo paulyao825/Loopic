@@ -61,13 +61,6 @@ export default function App() {
         <a className="brand" href="/" aria-label={text.homeAria}>
           <span className="brand-word">Precious Frame</span><span className="brand-stop">.</span>
         </a>
-        {isLanding ? (
-          <nav className="site-nav" aria-label={text.primaryNavAria}>
-            <a href="#how-it-works">{text.nav.how}</a>
-            <a href="#uses">{text.nav.uses}</a>
-            <a href="#future">{text.nav.next}</a>
-          </nav>
-        ) : <span />}
         <div className="topbar-right">
           <button
             className="language-toggle"

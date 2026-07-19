@@ -6,8 +6,6 @@ export interface AppCopy {
   languageButton: string;
   languageAria: string;
   homeAria: string;
-  primaryNavAria: string;
-  nav: { how: string; uses: string; next: string };
   theme: { dark: string; light: string; switchToDark: string; switchToLight: string };
   labels: { vision: string; judge: string; newRun: string; ai: string; localFallback: string; visionAi: string };
   phase: { uploading: string; extracting: string; loop1: string; loop2: string };
@@ -121,8 +119,6 @@ export const COPY: Record<Language, AppCopy> = {
     languageButton: "中文",
     languageAria: "Switch to Traditional Chinese",
     homeAria: "Precious Frame home",
-    primaryNavAria: "Primary navigation",
-    nav: { how: "How it works", uses: "Use cases", next: "What is next" },
     theme: { dark: "Dark", light: "Light", switchToDark: "Switch to dark mode", switchToLight: "Switch to light mode" },
     labels: { vision: "AI", judge: "AI", newRun: "new run", ai: "AI", localFallback: "local fallback", visionAi: "AI vision" },
     phase: { uploading: "extracting video frames", extracting: "preparing frames", loop1: "loop 1 / selecting frames", loop2: "loop 2 / refining edits" },
@@ -221,8 +217,6 @@ export const COPY: Record<Language, AppCopy> = {
     languageButton: "EN",
     languageAria: "切換至英文",
     homeAria: "Precious Frame 首頁",
-    primaryNavAria: "主要導覽",
-    nav: { how: "運作方式", uses: "使用情境", next: "未來方向" },
     theme: { dark: "暗色", light: "亮色", switchToDark: "切換至暗色模式", switchToLight: "切換至亮色模式" },
     labels: { vision: "AI", judge: "AI", newRun: "重新開始", ai: "AI", localFallback: "本機備援", visionAi: "AI 視覺判斷" },
     phase: { uploading: "擷取影片影格", extracting: "準備影格", loop1: "迴圈一／選擇影格", loop2: "迴圈二／改善修圖" },
